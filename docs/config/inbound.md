@@ -105,7 +105,7 @@
 
 是否开启流量探测。
 
-> `destOverride`: \["http" | "tls" | "quic" | "fakedns" | "fakedns+others" \]
+> `destOverride`: \["http" | "tls" | "fakedns" | "fakedns+others" \]
 
 当流量为指定类型时，按其中包括的目标地址重置当前连接的目标。
 
