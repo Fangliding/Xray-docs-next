@@ -1,1 +1,0 @@
-const e={key:"v-5c48c82b",path:"/development/protocols/vless.html",title:"VLESS 协议",lang:"zh-CN",frontmatter:{},excerpt:"",headers:[],filePathRelative:"development/protocols/vless.md",git:{updatedTime:1618115805e3,contributors:[{name:"JimhHan",email:"50871214+JimhHan@users.noreply.github.com",commits:1}]}};export{e as data};
