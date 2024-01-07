@@ -34,6 +34,7 @@ export function getConfigSidebar(
         path + "routing.md",
         path + "stats.md",
         path + "transport.md",
+        path + "metrics.md",
       ],
     },
     {
