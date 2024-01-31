@@ -2,7 +2,7 @@
 home: true
 heroImage: /LogoX2.png
 heroText: Project X
-tagline: 不畏浮云遮望眼 · 金睛如炬耀苍穹
+tagline: 不畏浮云遮望眼 · 自缘身在传输层
 actions:
   - text: 由此开始 →
     link: /document/
