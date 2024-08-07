@@ -9,7 +9,7 @@ export const sidebarZh: SidebarConfig = {
         '/config/features/fallback.md',
         '/config/features/browser_dialer.md',
         '/config/features/env.md',
-        '/config/transport.md'
+        '/config/transport.md',
         '/config/features/multiple.md',
       ],
     },
