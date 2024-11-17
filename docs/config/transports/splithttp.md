@@ -1,6 +1,8 @@
-# SplitHTTP（H2、QUIC H3）
+# XHTTP（H2、QUIC H3）
 
-<Badge text="v1.8.16+" type="warning"/>
+<Badge text="v24.11.11+" type="warning"/>
+
+曾用名 SplitHTTP 更名后互为alias
 
 使用HTTP分块传输编码流式响应处理下载，使用多个HTTP POST请求进行上传。
 
@@ -10,11 +12,11 @@
 
 目的与V2fly Meek相同，由于使用了流式响应处理下载，下行速率更为优秀，上行也经过优化但仍非常有限，也因此对 HTTP 中间盒要求更高（见上）。
 
-`SplitHTTP` 也接受 `X-Forwarded-For` header。
+`XHTTP` 也接受 `X-Forwarded-For` header。
 
-## SplitHttpObject
+## XHTTPObject
 
-The `SplitHttpObject` 对应传输配置的 `splithttpSettings` 项。
+The `XHTTPObject` 对应传输配置的 `xhttpSettings` 项。
 
 ```json
 {
@@ -33,17 +35,19 @@ The `SplitHttpObject` 对应传输配置的 `splithttpSettings` 项。
     "maxConnections": 0,
     "cMaxReuseTimes": 0,
     "cMaxLifetimeMs": 0
-  }
+  },
+  "downloadSettings": {},
+  "mode": "auto"
 }
 ```
 
 > `path`: string
 
-SplitHTTP 所使用的 HTTP 协议路径，默认值为 `"/"`。
+XHTTP 所使用的 HTTP 协议路径，默认值为 `"/"`。
 
 > `host`: string
 
-SplitHTTP 的HTTP请求中所发送的host，默认值为空。若服务端值为空时，不验证客户端发送来的host值。
+XHTTP 的HTTP请求中所发送的host，默认值为空。若服务端值为空时，不验证客户端发送来的host值。
 
 当在服务端指定该值，或在 ```headers``` 中指定host，将会校验与客户端请求host是否一致。
 
@@ -89,13 +93,37 @@ SplitHTTP 的HTTP请求中所发送的host，默认值为空。若服务端值�
 
 设置为 `-1` 将完全禁用填充
 
+> `downloadSettings` StreamConfig
+
+下行流选项，存在此选项时，XHTTP将使用另一条连接处理下行流量，比如可以让上行流量直接连接到服务端，但是通过CDN传输下行流量，下列描述可能相当复杂，需要具有一些基础知识。
+
+::: tip
+这是七层的上下行分流，和常见的“VPS去程回程”不是一个意思，xray和两个端点都会建立**完整**的 HTTP(S) 连接，不要以为这可以优化什么“回程直去程绕”的线路，下载速度仍直接受限于从端点直接下载的速度，延迟也不会更好看，除开一些非常极端的情况，这个功能绝对不会让你的速度更快，它最大的作用是打乱流量的特征
+::: 
+
+本质是一个 [streamSettings](../transport.md) 但是多了 `"address"` 和 `"port"` 字段以指定发起下行连接的目标，你需要设置 `"network":"xhttp"` 并在这里面的 `xhttpSettings` 里定义你需要的参数，比如 Host, 也可也修改 `tlsSettings` 指定使用 h3 还是 h2, 甚至修改sockopt 指定网卡让它走不同的运营商（如果你家里有），想象力有多大它就有多大，前提是你有能力把它调通。
+
+注意现阶段这是一个仅客户端的参数，服务端仍然只会监听一个端口，需要想办法进行反代和转发让流量变成可以让服务端合法接受的模式
+
+比如如果需要直连服务端使用 REALITY 发起上行和经过CDN发起下行连接，需要服务端监听HTTP，准备一个 VLESS REALITY + fallback 入站将客户端发送的REALITY请求拆成明文h2c, 再用一个 VLESS + fallback 入站或者 Nginx 将 CDN 回源的 HTTPS 流量拆成 http/1.1 或者 h2c. 然后把这两束请求转发去xhttp 监听的端口
+
+> `mode` auto | packet-up | stream-up
+
+指定上行流量的发送方式，默认 `auto`，行为为默认使用 `packet-up` 当使用 REALITY 时使用 `stream-up`
+
+`packet-up`: 使用分包多个post传输上行数据，和各种中间盒兼容性较好，但是速度和延迟比较不稳定，考虑到一般上行流量不大可以满足日用。
+
+`stream-up`: 流式上传，这种情况下可以正常发挥线路的上传能力，但是兼容性相当差，建议使用时直接对接 Xray 核心或者只使用 L4 转发。几乎不会有 CDN 允许这种行为，Nginx 和 Caddy 等反代需要修改配置文件，详见各自的文档
+
+当在服务端指定该字段时，auto代表服务端同时接受两种上传方式，如果单指定了一种模式表示服务端只接受这种模式的上行请求
+
 > `xmux`: [XmuxObject](#xmuxobject)
 
 ## XmuxObject
 
 <Badge text="v24.9.19+" type="warning"/>
 
-仅客户端，允许用户对 SplitHTTP 在 h2 与 h3 中的多路复用行为进行控制。使用该功能时不要启用 mux.cool。
+仅客户端，允许用户对 XHTTP 在 h2 与 h3 中的多路复用行为进行控制。使用该功能时不要启用 mux.cool。
 
 ```json
 {
